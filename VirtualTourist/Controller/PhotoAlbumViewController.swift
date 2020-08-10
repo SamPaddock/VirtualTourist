@@ -28,7 +28,15 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         // Do any additional setup after loading the view.
     }
     
-    //TODO: Stroe images an binary data ib Photo entity (Allow External storage)
+    //Function to place pin on the map of tapped location
+    func placePinLocation(){
+        guard let sentCoordinates = coordinate else {return}
+        let annotation = MKPointAnnotation()
+        annotation.coordinate = sentCoordinates
+        self.mapScene.addAnnotation(annotation)
+    }
+    
+    //TODO: Stroe images an binary data in Photo entity (Allow External storage)
     
     //TODO: tapped images are removed from collection view, photo album, and core data
     
