@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class TravelLocationMapViewController: UIViewController {
+class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
 
     //MARK: Properties
     @IBOutlet weak var mapScene: MKMapView!
@@ -17,10 +17,27 @@ class TravelLocationMapViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        mapScene.delegate = self
+        registerGestureLongTap()
     }
     
     //TODO: register a touch and hold gesture to add pin
+    func registerGestureLongTap(){
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.addPin))
+        longPress.minimumPressDuration = 1
+        longPress.delaysTouchesBegan = true
+        self.mapScene.addGestureRecognizer(longPress)
+    }
+    
+    @objc func addPin(gestureRecognizer: UILongPressGestureRecognizer){
+        if gestureRecognizer.state == UIGestureRecognizer.State.began {
+            let selectedLocation = gestureRecognizer.location(in: self.mapScene)
+            let coordination = self.mapScene.convert(selectedLocation, toCoordinateFrom: self.mapScene)
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordination
+            self.mapScene.addAnnotation(annotation)
+        }
+    }
     
     //TODO: Tapped pin, transitions to photo album interface (with, tapped location)
     
