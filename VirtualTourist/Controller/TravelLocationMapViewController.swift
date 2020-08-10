@@ -40,6 +40,15 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     //TODO: Tapped pin, transitions to photo album interface (with, tapped location)
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        if control == view.rightCalloutAccessoryView {
+            if let coordinate = view.annotation?.coordinate {
+                let photoAlbumVC = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
+                photoAlbumVC.coordinate = coordinate
+                self.present(photoAlbumVC, animated: true, completion: nil)
+            }
+        }
+    }
     
     //TODO: added pins are presisted as Pin instance in CoreData and context is saved
 

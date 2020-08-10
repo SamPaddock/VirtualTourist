@@ -9,11 +9,13 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
 
     //MARK: properties
     @IBOutlet weak var mapScene: MKMapView!
     @IBOutlet weak var photoAlbumCollectionView: UICollectionView!
+    
+    var coordinate: CLLocationCoordinate2D? = nil
     
     
     //TODO: If pin tapped, does not contain photos, download from flickr
