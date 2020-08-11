@@ -17,6 +17,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     
     var coordinate: CLLocationCoordinate2D? = nil
     
+    var dataController: DataController! {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        return appDelegate.dataController
+    }
     
     //TODO: If pin tapped, does not contain photos, download from flickr
     

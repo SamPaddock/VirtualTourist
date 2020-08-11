@@ -12,10 +12,14 @@ import CoreData
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-
+    /// instance of DataController class
+    let dataController = DataController(modelName: "VirtualTourist")
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        ///Loading Data from store
+        dataController.load()
+        
         return true
     }
 
