@@ -54,16 +54,29 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    //MARK: MapKit Delegate
+    //MARK: MapView Delegate functions
+    
+    //Creat pin to add on the map
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        var mapPin = mapScene.dequeueReusableAnnotationView(withIdentifier: "pin")
+        
+        if mapPin == nil {
+            print("adding pin")
+            mapPin = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "pin")
+            mapPin?.canShowCallout = true
+            mapPin?.rightCalloutAccessoryView = UIButton(type: .infoDark)
+            
+        }
+        
+        return mapPin
+    }
     
     //TODO: Tapped pin, transitions to photo album interface (with, tapped location)
-    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        if control == view.rightCalloutAccessoryView {
-            if let coordinate = view.annotation?.coordinate {
-                let photoAlbumVC = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
-                photoAlbumVC.coordinate = coordinate
-                self.present(photoAlbumVC, animated: true, completion: nil)
-            }
+    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        if let coordinate = view.annotation?.coordinate {
+            let photoAlbumVC = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
+            photoAlbumVC.coordinate = coordinate
+            self.present(photoAlbumVC, animated: true, completion: nil)
         }
     }
     

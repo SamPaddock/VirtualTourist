@@ -28,8 +28,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         // Do any additional setup after loading the view.
+        mapScene.delegate = self
+        placePinLocation()
     }
     
     //Function to place pin on the map of tapped location
@@ -38,6 +39,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         let annotation = MKPointAnnotation()
         annotation.coordinate = sentCoordinates
         self.mapScene.addAnnotation(annotation)
+        
+        //center map view on selected location
+        let region = MKCoordinateRegion(center: sentCoordinates, span: MKCoordinateSpan(latitudeDelta: 3, longitudeDelta: 3))
+        mapScene.setRegion(region, animated: true)
     }
     
     //TODO: Stroe images an binary data in Photo entity (Allow External storage)
