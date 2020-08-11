@@ -54,7 +54,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    //MARK: Navigation: selected location
+    //MARK: MapKit Delegate
     
     //TODO: Tapped pin, transitions to photo album interface (with, tapped location)
     func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
@@ -65,6 +65,26 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
                 self.present(photoAlbumVC, animated: true, completion: nil)
             }
         }
+    }
+    
+    func LoadPinsOnMap(pins: [Pin]){
+        guard pins.count != 0 else {return}
+        
+        //creat a map annotations array
+        var mapAnnotation = [MKPointAnnotation]()
+        
+        for pin in pins {
+            //create a map annotation
+            let annotation = MKPointAnnotation()
+            let coordination = CLLocationCoordinate2D(latitude: pin.latitude, longitude: pin.longitude)
+            annotation.coordinate = coordination
+            mapAnnotation.append(annotation)
+        }
+        
+        //remove current annotation and add new annotations
+        mapScene.removeAnnotations(mapScene.annotations)
+        mapScene.addAnnotations(mapAnnotation)
+        
     }
     
     //MARK: Save/Load pin location to/from Core Data
@@ -87,10 +107,8 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     func loadPinLocation(){
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         if let results = try? dataController.viewContext.fetch(fetchRequest) {
-            pins = results
+            LoadPinsOnMap(pins: results)
         }
     }
-
-
 }
 
