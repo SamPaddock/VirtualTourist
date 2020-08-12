@@ -9,13 +9,14 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate {
 
     //MARK: properties
     @IBOutlet weak var mapScene: MKMapView!
     @IBOutlet weak var photoAlbumCollectionView: UICollectionView!
     
     var coordinate: CLLocationCoordinate2D? = nil
+    var pin: Pin!
     
     var dataController: DataController! {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -25,22 +26,13 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     //TODO: If pin tapped, does not contain photos, download from flickr
     
     //TODO: If pin tapped, does have images, no download needed
-    func downloadImages(){
-        print("downloading")
-        guard let coordinate = coordinate else {return}
-        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, 1) { (data, error) in
-            if let data = data {
-                print(String(data: data, encoding: .utf8))
-            } else {
-                print(error?.localizedDescription)
-            }
-        }
-    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         mapScene.delegate = self
+        photoAlbumCollectionView.delegate = self
         placePinLocation()
         downloadImages()
     }
@@ -57,8 +49,38 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
         mapScene.setRegion(region, animated: true)
     }
     
-    //TODO: Stroe images an binary data in Photo entity (Allow External storage)
+    func downloadImages(){
+        print("downloading")
+        guard let coordinate = coordinate else {return}
+        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, 1) { (response, error) in
+            if let response = response {
+                self.downloadImage(response.photos.photo)
+            } else {
+                print(error?.localizedDescription ?? "error")
+            }
+        }
+    }
     
+    func downloadImage(_ photos: [PhotoSet]){
+        for photo in photos {
+            ImageRetrieval.flickrGetPhoto(photo: photo) { (photoData, photoURL, error) in
+                if let photoData = photoData,  let photoURL = photoURL{
+                    self.storePhoto(photoData, photoURL)
+                } else {
+                    print(error?.localizedDescription ?? "error")
+                }
+            }
+        }
+    }
+    
+    //TODO: Stroe images an binary data in Photo entity (Allow External storage)
+    func storePhoto(_ photo: Data,_ url: URL){
+        let photoContext = Photos(context: dataController.viewContext)
+        photoContext.photoData = photo
+        photoContext.photoURL = url
+        photoContext.location = self.pin
+        try? dataController.viewContext.save()
+    }
     //TODO: tapped images are removed from collection view, photo album, and core data
     
     //TODO: "New Collection" button redownloads new images from other pages (use random value for "page" parameter)

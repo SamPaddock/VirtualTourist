@@ -22,7 +22,6 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     
     var pins: [Pin] = []
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         mapScene.delegate = self
@@ -65,16 +64,23 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
             mapPin = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "pin")
             mapPin?.canShowCallout = true
             mapPin?.rightCalloutAccessoryView = UIButton(type: .infoDark)
-            
         }
         
         return mapPin
     }
     
-    //TODO: Tapped pin, transitions to photo album interface (with, tapped location)
+    //FUnction for tapped pin, transitions to photo album interface (with, tapped location)
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         if let coordinate = view.annotation?.coordinate {
             let photoAlbumVC = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
+            
+            let lat = Double(coordinate.latitude)
+            let lon = Double(coordinate.longitude)
+            for pin in pins {
+                if pin.latitude == lat && pin.longitude == lon {
+                    photoAlbumVC.pin = pin
+                }
+            }
             photoAlbumVC.coordinate = coordinate
             self.present(photoAlbumVC, animated: true, completion: nil)
         }
@@ -102,7 +108,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     
     //MARK: Save/Load pin location to/from Core Data
     
-    //TODO: added pins are presisted as Pin instance in CoreData and context is saved
+    //FUnction to added pins are presisted as Pin instance in CoreData and context is saved
     func savePinLocation(coordinate: CLLocationCoordinate2D){
         //Save location in coreData
         let pin = Pin(context: dataController.viewContext)

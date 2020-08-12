@@ -7,24 +7,31 @@
 //
 
 import Foundation
+import UIKit
 
+//Class to download images from Flickr
 class ImageRetrieval{
-    //TODO: class to download images from Flickr
     
-    class func flickerAPI(_ lat: Double = 24.774265, _ lon: Double = 46.738586, _ range: Int, completion: @escaping (_ data: Data?,_ error: Error?) -> Void ){
+    
+    class func flickerAPI(_ lat: Double = 24.774265, _ lon: Double = 46.738586, _ range: Int, completion: @escaping (_ data: FlickrResponse?,_ error: Error?) -> Void ){
         let randomPage = Int.random(in: 1 ... range)
         
         let urlComponents = createURL(lat, lon, randomPage)
         print(urlComponents)
         let task = URLSession.shared.dataTask(with: urlComponents.url!) { (data, response, error) in
             guard let data = data else {
-                fatalError(error!.localizedDescription)
-                completion(nil, error)
+                DispatchQueue.main.async {completion(nil, error)}
                 return
             }
             
-            print(String(data: data, encoding: .utf8))
-            completion(data, nil)
+            let decoder = JSONDecoder()
+            
+            do{
+                let decodedObject = try decoder.decode(FlickrResponse.self, from: data)
+                DispatchQueue.main.async { completion(decodedObject, nil) }
+            } catch {
+                DispatchQueue.main.async {completion(nil, error)}
+            }
         }
         task.resume()
         
@@ -56,4 +63,19 @@ class ImageRetrieval{
     }
     
     //TODO: Display images as they are downloaded and replaces placeholders
+    class func flickrGetPhoto(photo: PhotoSet, completion: @escaping (_ photoData: Data?,_ photoURl: URL?, _ error: Error?) -> Void){
+        let urlString = "https://farm\(photo.farm).staticflickr.com/\(photo.server)/\(photo.id)_\(photo.secret).jpg"
+        let url = URL(string: urlString)
+        
+        let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
+            guard let data = data else {
+                DispatchQueue.main.async {completion(nil, nil, error)}
+                return
+            }
+            
+            DispatchQueue.main.async {completion(data, url, nil)}
+        }
+        task.resume()
+        
+    }
 }
