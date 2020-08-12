@@ -25,12 +25,24 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate {
     //TODO: If pin tapped, does not contain photos, download from flickr
     
     //TODO: If pin tapped, does have images, no download needed
+    func downloadImages(){
+        print("downloading")
+        guard let coordinate = coordinate else {return}
+        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, 1) { (data, error) in
+            if let data = data {
+                print(String(data: data, encoding: .utf8))
+            } else {
+                print(error?.localizedDescription)
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         mapScene.delegate = self
         placePinLocation()
+        downloadImages()
     }
     
     //Function to place pin on the map of tapped location

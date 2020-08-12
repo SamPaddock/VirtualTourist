@@ -54,7 +54,7 @@
                                 </constraints>
                             </mapView>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="EUe-ZW-5aI">
-                                <rect key="frame" x="0.0" y="293" width="414" height="569"/>
+                                <rect key="frame" x="0.0" y="293" width="414" height="520"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" automaticEstimatedItemSize="YES" minimumLineSpacing="10" minimumInteritemSpacing="10" id="fFi-5z-lN2">
                                     <size key="itemSize" width="128" height="128"/>
@@ -87,14 +87,25 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="TMY-kS-0O2">
+                                <rect key="frame" x="0.0" y="813" width="414" height="49"/>
+                                <items>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="bfb-iC-7fx"/>
+                                    <barButtonItem title="New Collection" id="ZqY-Hl-mzT"/>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="jmL-YA-Dpc"/>
+                                </items>
+                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="EUe-ZW-5aI" firstAttribute="top" secondItem="uCa-Wd-Zb1" secondAttribute="bottom" id="442-WL-K4V"/>
                             <constraint firstItem="EUe-ZW-5aI" firstAttribute="leading" secondItem="WOb-Ck-GEC" secondAttribute="leading" id="77c-Zk-dgS"/>
+                            <constraint firstItem="TMY-kS-0O2" firstAttribute="bottom" secondItem="WOb-Ck-GEC" secondAttribute="bottom" id="DuS-Be-2og"/>
                             <constraint firstItem="WOb-Ck-GEC" firstAttribute="trailing" secondItem="EUe-ZW-5aI" secondAttribute="trailing" id="Uvc-yl-Dcd"/>
-                            <constraint firstItem="EUe-ZW-5aI" firstAttribute="bottom" secondItem="WOb-Ck-GEC" secondAttribute="bottom" id="dck-js-hHP"/>
+                            <constraint firstItem="EUe-ZW-5aI" firstAttribute="bottom" secondItem="TMY-kS-0O2" secondAttribute="top" id="dck-js-hHP"/>
                             <constraint firstItem="WOb-Ck-GEC" firstAttribute="trailing" secondItem="uCa-Wd-Zb1" secondAttribute="trailing" id="lhb-Sv-Qow"/>
+                            <constraint firstItem="TMY-kS-0O2" firstAttribute="leading" secondItem="WOb-Ck-GEC" secondAttribute="leading" id="qJC-L1-TJR"/>
+                            <constraint firstItem="TMY-kS-0O2" firstAttribute="trailing" secondItem="WOb-Ck-GEC" secondAttribute="trailing" id="r5C-0e-NMo"/>
                             <constraint firstItem="uCa-Wd-Zb1" firstAttribute="leading" secondItem="WOb-Ck-GEC" secondAttribute="leading" id="xZA-hb-otm"/>
                             <constraint firstItem="uCa-Wd-Zb1" firstAttribute="top" secondItem="WOb-Ck-GEC" secondAttribute="top" id="yOa-PB-4iZ"/>
                         </constraints>
