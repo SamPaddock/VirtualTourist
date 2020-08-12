@@ -9,7 +9,7 @@
 import UIKit
 import MapKit
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate {
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
     //MARK: properties
     @IBOutlet weak var mapScene: MKMapView!
@@ -17,6 +17,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     var coordinate: CLLocationCoordinate2D? = nil
     var pin: Pin!
+    var photoAlbum: [PhotoSet] = []
     
     var dataController: DataController! {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -33,6 +34,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         // Do any additional setup after loading the view.
         mapScene.delegate = self
         photoAlbumCollectionView.delegate = self
+        photoAlbumCollectionView.dataSource = self
         placePinLocation()
         downloadImages()
     }
@@ -50,25 +52,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     }
     
     func downloadImages(){
-        print("downloading")
         guard let coordinate = coordinate else {return}
+        photoAlbum.removeAll()
         ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, 1) { (response, error) in
             if let response = response {
-                self.downloadImage(response.photos.photo)
+                print("savinf response")
+                print(response.photos.photo)
+                self.photoAlbum = response.photos.photo
+                self.photoAlbumCollectionView.reloadData()
             } else {
                 print(error?.localizedDescription ?? "error")
-            }
-        }
-    }
-    
-    func downloadImage(_ photos: [PhotoSet]){
-        for photo in photos {
-            ImageRetrieval.flickrGetPhoto(photo: photo) { (photoData, photoURL, error) in
-                if let photoData = photoData,  let photoURL = photoURL{
-                    self.storePhoto(photoData, photoURL)
-                } else {
-                    print(error?.localizedDescription ?? "error")
-                }
             }
         }
     }
@@ -81,6 +74,35 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         photoContext.location = self.pin
         try? dataController.viewContext.save()
     }
+    
+    //MARK: Collection View Data Source
+
+    //get number of sent memes to set number of items
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        print(photoAlbum.count)
+        return photoAlbum.count
+    }
+
+    //Fill cells with sent memes
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoAlbumCell", for: indexPath) as! PhotoAlbumCollectionViewCell
+        
+        let photo = photoAlbum[indexPath.row]
+        
+        ImageRetrieval.flickrGetPhoto(photo: photo) { (photoData, photoURL, error) in
+            if let photoData = photoData,  let photoURL = photoURL{
+                self.storePhoto(photoData, photoURL)
+                cell.photo.image = UIImage(data: photoData)
+                cell.setNeedsLayout()
+            } else {
+                print(error?.localizedDescription ?? "error")
+            }
+        }
+    
+        return cell
+    }
+    
+    
     //TODO: tapped images are removed from collection view, photo album, and core data
     
     //TODO: "New Collection" button redownloads new images from other pages (use random value for "page" parameter)
