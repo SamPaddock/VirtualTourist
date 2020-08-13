@@ -21,6 +21,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     var pins: [Pin] = []
+    var mapLocation: [String: Double] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,7 +29,22 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         
         loadPinLocation()
         registerGestureLongTap()
-        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        if let mapLocation = UserDefaults.standard.object(forKey: "mapLocation") {
+            let mapLocationSetter = mapLocation as! [String:Double]
+            
+            let latSpan = CLLocationDegrees(mapLocationSetter["regionLat"]!)
+            let lonSpan = CLLocationDegrees(mapLocationSetter["regionLon"]!)
+            let mapSpan = MKCoordinateSpan(latitudeDelta: latSpan, longitudeDelta: lonSpan)
+            
+            let latCenter = CLLocationDegrees(mapLocationSetter["centerLat"]!)
+            let lonCenter = CLLocationDegrees(mapLocationSetter["centerLon"]!)
+            let mapCenter = CLLocationCoordinate2D(latitude: latCenter, longitude: lonCenter)
+            
+            mapScene.region = MKCoordinateRegion(center: mapCenter, span: mapSpan)
+        }
     }
     
     //MARK: Gesture Recognition and Action
@@ -60,7 +76,6 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         var mapPin = mapScene.dequeueReusableAnnotationView(withIdentifier: "pin")
         
         if mapPin == nil {
-            print("adding pin")
             mapPin = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "pin")
             mapPin?.canShowCallout = true
             mapPin?.rightCalloutAccessoryView = UIButton(type: .infoDark)
@@ -84,6 +99,14 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
             photoAlbumVC.coordinate = coordinate
             self.present(photoAlbumVC, animated: true, completion: nil)
         }
+    }
+    
+    func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
+        mapLocation["regionLat"] = Double(mapView.region.span.latitudeDelta)
+        mapLocation["regionLon"] = Double(mapView.region.span.longitudeDelta)
+        mapLocation["centerLat"] = Double(mapView.region.center.latitude)
+        mapLocation["centerLon"] = Double(mapView.region.center.longitude)
+        UserDefaults.standard.set(mapLocation, forKey: "mapLocation")
     }
     
     func LoadPinsOnMap(pins: [Pin]){

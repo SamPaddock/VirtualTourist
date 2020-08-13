@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="16119" systemVersion="19E287" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="MapSettings" representedClassName="MapSettings" syncable="YES" codeGenerationType="class">
+        <attribute name="centerLat" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="centerLon" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="regionLat" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="regionLon" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+    </entity>
     <entity name="Photos" representedClassName="Photos" syncable="YES" codeGenerationType="class">
-        <attribute name="photoData" optional="YES" attributeType="Binary"/>
+        <attribute name="photoData" optional="YES" attributeType="Binary" allowsExternalBinaryDataStorage="YES"/>
         <attribute name="photoURL" optional="YES" attributeType="URI"/>
         <relationship name="location" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Pin" inverseName="photos" inverseEntity="Pin"/>
     </entity>
@@ -12,6 +18,7 @@
     </entity>
     <elements>
         <element name="Photos" positionX="-54" positionY="9" width="128" height="88"/>
-        <element name="Pin" positionX="-63" positionY="-18" width="128" height="88"/>
+        <element name="Pin" positionX="-279.5703125" positionY="9.7734375" width="128" height="88"/>
+        <element name="MapSettings" positionX="-172.2578125" positionY="182.77734375" width="128" height="103"/>
     </elements>
 </model>
