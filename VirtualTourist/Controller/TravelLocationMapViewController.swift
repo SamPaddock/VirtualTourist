@@ -84,7 +84,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         return mapPin
     }
     
-    //FUnction for tapped pin, transitions to photo album interface (with, tapped location)
+    //Function for tapped pin, transitions to photo album interface (with, tapped location)
     func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         if let coordinate = view.annotation?.coordinate {
             let photoAlbumVC = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
@@ -109,6 +109,8 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         UserDefaults.standard.set(mapLocation, forKey: "mapLocation")
     }
     
+    //MARK: Load Pins On Map
+    
     func LoadPinsOnMap(pins: [Pin]){
         guard pins.count != 0 else {return}
         
@@ -131,7 +133,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     
     //MARK: Save/Load pin location to/from Core Data
     
-    //FUnction to added pins are presisted as Pin instance in CoreData and context is saved
+    //Function to added pins are presisted as Pin instance in CoreData and context is saved
     func savePinLocation(coordinate: CLLocationCoordinate2D){
         //Save location in coreData
         let pin = Pin(context: dataController.viewContext)

@@ -18,38 +18,24 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     var coordinate: CLLocationCoordinate2D? = nil
     var pin: Pin!
-    var photoAlbum: [PhotoSet] = []
-    var photos: [Photos] = []
+    var photoAlbum: [Photos] = []
     
     var dataController: DataController! {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         return appDelegate.dataController
     }
     
-    //TODO: If pin tapped, does not contain photos, download from flickr
-    
-    //TODO: If pin tapped, does have images, no download needed
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
         //Delegate views to self
         mapScene.delegate = self
         photoAlbumCollectionView.delegate = self
         photoAlbumCollectionView.dataSource = self
         //Show location of photos
         placePinLocation()
-        //TODO: Check if there are saved photos of that location
-        downloadImages()
-    }
-    
-    func fetchPhotos(){
-        let fetchRequest: NSFetchRequest<Photos> = Photos.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "pin = %@", pin)
-        if let results = try? dataController.viewContext.fetch(fetchRequest) {
-            photos = results
-        }
+        //Check if there are saved photos of that location
+        fetchPhotos()
     }
     
     //Function to place pin on the map of tapped location
@@ -64,28 +50,33 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         mapScene.setRegion(region, animated: true)
     }
     
+    //Function to fetch photos from DataCore, if it does not contain photos, download from flickr
+    func fetchPhotos(){
+        let fetchRequest: NSFetchRequest<Photos> = Photos.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "pin = %@", pin)
+        if let results = try? dataController.viewContext.fetch(fetchRequest) {
+            //Set photos from data core
+            photoAlbum = results
+        } else {
+            //Download photos from flickr
+            downloadImages()
+        }
+    }
+    
+    //Function to download photo information from Flickr
     func downloadImages(){
         guard let coordinate = coordinate else {return}
         photoAlbum.removeAll()
         ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, 1) { (response, error) in
             if let response = response {
                 print("saving response")
-                print(response.photos.photo)
-                self.photoAlbum = response.photos.photo
+                print(response)
+                self.photoAlbum = response
                 self.photoAlbumCollectionView.reloadData()
             } else {
                 print(error?.localizedDescription ?? "error")
             }
         }
-    }
-    
-    //Function to Stroe images as binary data in Photo entity
-    func storePhoto(_ photo: Data,_ url: URL){
-        let photoContext = Photos(context: dataController.viewContext)
-        photoContext.photoData = photo
-        photoContext.photoURL = url
-        photoContext.location = self.pin
-        try? dataController.viewContext.save()
     }
     
     //MARK: Collection View Data Source
@@ -98,25 +89,42 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
 
     //Fill cells with photos from album
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoAlbumCell", for: indexPath) as! PhotoAlbumCollectionViewCell
+        var cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoAlbumCell", for: indexPath) as! PhotoAlbumCollectionViewCell
         
-        cell.photo.backgroundColor = .gray
-        let photo = photoAlbum[indexPath.row]
+        let photoCell = photoAlbum[indexPath.row]
         
-        ImageRetrieval.flickrGetPhoto(photo: photo) { (photoData, photoURL, error) in
-            if let photoData = photoData,  let photoURL = photoURL{
+        if photoCell.photoData != nil {
+            cell.photo.image = UIImage(data: photoCell.photoData!)
+        } else {
+            downloadPhotoData(photoCell.photoURL!)
+        }
+        
+        
+        
+        return cell
+    }
+    
+    func downloadPhotoData (_ photoURL: URL) -> Data{
+        var photo: Data?
+        ImageRetrieval.flickrGetPhoto(photoURL: photoURL) { (photoData, error) in
+            if let photoData = photoData{
                 self.storePhoto(photoData, photoURL)
-                cell.photo.backgroundColor = .none
-                cell.photo.image = UIImage(data: photoData)
-                cell.setNeedsLayout()
+                photo = photoData
             } else {
                 print(error?.localizedDescription ?? "error")
             }
         }
-    
-        return cell
+        return photo!
     }
     
+    //Function to Stroe images as binary data in Photo entity
+    func storePhoto(_ photo: Data,_ url: URL){
+        let photoContext = Photos(context: dataController.viewContext)
+        photoContext.photoData = photo
+        photoContext.photoURL = url
+        photoContext.location = self.pin
+        try? dataController.viewContext.save()
+    }
     
     //TODO: tapped images are removed from collection view, photo album, and core data
     

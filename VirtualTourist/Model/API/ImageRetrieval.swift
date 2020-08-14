@@ -13,7 +13,7 @@ import UIKit
 class ImageRetrieval{
     
     
-    class func flickerAPI(_ lat: Double = 24.774265, _ lon: Double = 46.738586, _ range: Int, completion: @escaping (_ data: FlickrResponse?,_ error: Error?) -> Void ){
+    class func flickerAPI(_ lat: Double = 24.774265, _ lon: Double = 46.738586, _ range: Int, completion: @escaping (_ data: [Photos]?,_ error: Error?) -> Void ){
         let randomPage = Int.random(in: 1 ... range)
         
         let urlComponents = createURL(lat, lon, randomPage)
@@ -28,7 +28,10 @@ class ImageRetrieval{
             
             do{
                 let decodedObject = try decoder.decode(FlickrResponse.self, from: data)
-                DispatchQueue.main.async { completion(decodedObject, nil) }
+                let photoObject = decodedObject.photos.photo
+                let newObject = convertResponse(photoObject, lat, lon)
+                
+                DispatchQueue.main.async { completion(newObject, nil) }
             } catch {
                 DispatchQueue.main.async {completion(nil, error)}
             }
@@ -62,20 +65,38 @@ class ImageRetrieval{
         return urlComponents
     }
     
-    //TODO: Display images as they are downloaded and replaces placeholders
-    class func flickrGetPhoto(photo: PhotoSet, completion: @escaping (_ photoData: Data?,_ photoURl: URL?, _ error: Error?) -> Void){
-        let urlString = "https://farm\(photo.farm).staticflickr.com/\(photo.server)/\(photo.id)_\(photo.secret).jpg"
-        let url = URL(string: urlString)
+    class func convertResponse(_ photoData: [PhotoSet], _ lat: Double, _ lon: Double) -> [Photos]{
+        //Set pin locaton
+        let pin: Pin = Pin()
+        pin.latitude = lat
+        pin.longitude = lon
         
-        let task = URLSession.shared.dataTask(with: url!) { (data, response, error) in
+        //convert response to data model
+        var photos: [Photos] = []
+        for photo in photoData {
+            let newPhoto: Photos = Photos()
+            let urlString = "https://farm\(photo.farm).staticflickr.com/\(photo.server)/\(photo.id)_\(photo.secret).jpg"
+            newPhoto.location = pin
+            newPhoto.photoURL = URL(string: urlString)
+            photos.append(newPhoto)
+        }
+        
+        return photos
+    }
+    
+    //TODO: Display images as they are downloaded and replaces placeholders
+    class func flickrGetPhoto(photoURL: URL, completion: @escaping (_ photoData: Data?, _ error: Error?) -> Void){
+        let url = photoURL
+        
+        let task = URLSession.shared.dataTask(with: url) { (data, response, error) in
             guard let data = data else {
-                DispatchQueue.main.async {completion(nil, nil, error)}
+                DispatchQueue.main.async {completion(nil, error)}
                 return
             }
             
-            DispatchQueue.main.async {completion(data, url, nil)}
+            DispatchQueue.main.async {completion(data, nil)}
         }
         task.resume()
-        
+
     }
 }
