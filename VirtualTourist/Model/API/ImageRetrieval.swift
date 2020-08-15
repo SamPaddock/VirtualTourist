@@ -12,16 +12,15 @@ import UIKit
 //Class to download images from Flickr
 class ImageRetrieval{
     
-    var dataController: DataController! {
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        return appDelegate.dataController
-    }
+    //MARK: API Download Function
     
-    class func flickerAPI(_ lat: Double = 24.774265, _ lon: Double = 46.738586, _ range: Int, completion: @escaping (_ data: FlickrResponse?,_ error: Error?) -> Void ){
+    //Create session to retrieve photos of sent location
+    class func flickerAPI(_ lat: Double, _ lon: Double, _ range: Int, completion: @escaping (_ data: FlickrResponse?,_ error: Error?) -> Void ){
+        //Generate random digit from 1 to total number of pages
         let randomPage = Int.random(in: 1 ... range)
-        
+        //Create the url link
         let urlComponents = createURL(lat, lon, randomPage)
-        
+        //Start session to retrieve the data
         let task = URLSession.shared.dataTask(with: urlComponents.url!) { (data, response, error) in
             guard let data = data else {
                 DispatchQueue.main.async {completion(nil, error)}
@@ -31,6 +30,7 @@ class ImageRetrieval{
             let decoder = JSONDecoder()
             
             do{
+                //decode data using codable structure
                 let decodedObject = try decoder.decode(FlickrResponse.self, from: data)
                 DispatchQueue.main.async { completion(decodedObject, nil) }
             } catch {
@@ -41,6 +41,9 @@ class ImageRetrieval{
         
     }
     
+    //MARK: URL Creation FUnction
+    
+    //Compose url link with query
     class func createURL(_ lat: Double, _ lon: Double, _ random: Int) -> URLComponents {
         var urlComponents = URLComponents()
         

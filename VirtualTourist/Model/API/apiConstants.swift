@@ -8,6 +8,7 @@
 
 import Foundation
 
+//MARK: URL Contants
 struct FlickrURL {
     static let scheme = "https"
     static let host = "api.flickr.com"
@@ -15,10 +16,12 @@ struct FlickrURL {
     static let apiKey = "5432ff94da1afa0805fba476169b2e86"
 }
 
+//MARK: Flickr Methods
 struct FlickrMethod {
     static let photoSearch = "flickr.photos.search"
 }
 
+//MARK: Flickr Query Key
 struct FlickrKeys {
     static let apiKey = "api_key"
     static let method = "method"
@@ -33,6 +36,7 @@ struct FlickrKeys {
     static let extra = "extras"
 }
 
+//MARK: Flickr Query Values
 struct FlickrValues {
     static let cityAccuracy = "11"
     static let jsonFormat = "json"

@@ -13,24 +13,32 @@ import CoreData
 class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
 
     //MARK: Properties
+    //Outlet properties
     @IBOutlet weak var mapScene: MKMapView!
     
+    //DataController property
     var dataController: DataController! {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         return appDelegate.dataController
     }
     
+   //Data related properties
     var pins: [Pin] = []
     var mapLocation: [String: Double] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        mapScene.delegate = self
         
+        //Delegate views to self
+        mapScene.delegate = self
+        //Load saved pins on map
         loadPinLocation()
+        //Register gestures to map
         registerGestureLongTap()
     }
     
+    
+    //When view will appear, set last set location and zoom level
     override func viewWillAppear(_ animated: Bool) {
         if let mapLocation = UserDefaults.standard.object(forKey: "mapLocation") {
             let mapLocationSetter = mapLocation as! [String:Double]
@@ -101,6 +109,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
+    //Function to save last set location and zoom level
     func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
         mapLocation["regionLat"] = Double(mapView.region.span.latitudeDelta)
         mapLocation["regionLon"] = Double(mapView.region.span.longitudeDelta)
@@ -148,6 +157,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         self.mapScene.addAnnotation(annotation)
     }
     
+    //Function to fetch all pins from Core data
     func loadPinLocation(){
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         if let results = try? dataController.viewContext.fetch(fetchRequest) {
