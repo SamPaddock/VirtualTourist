@@ -30,11 +30,13 @@ struct FlickrKeys {
     static let page = "page"
     static let format = "format"
     static let nojsoncallback = "nojsoncallback"
+    static let extra = "extras"
 }
 
 struct FlickrValues {
     static let cityAccuracy = "11"
     static let jsonFormat = "json"
     static let nojsoncallback = "1"
+    static let extraURL = "url_m"
 }
 

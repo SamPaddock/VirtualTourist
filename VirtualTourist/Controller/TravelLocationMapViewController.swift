@@ -151,6 +151,7 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
     func loadPinLocation(){
         let fetchRequest: NSFetchRequest<Pin> = Pin.fetchRequest()
         if let results = try? dataController.viewContext.fetch(fetchRequest) {
+            pins = results
             LoadPinsOnMap(pins: results)
         }
     }

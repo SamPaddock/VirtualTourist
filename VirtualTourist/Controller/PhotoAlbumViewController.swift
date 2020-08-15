@@ -9,6 +9,7 @@
 import UIKit
 import MapKit
 import CoreData
+import Kingfisher
 
 class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource {
 
@@ -19,6 +20,8 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     var coordinate: CLLocationCoordinate2D? = nil
     var pin: Pin!
     var photoAlbum: [Photos] = []
+    var photoResponse: FlickrResponse!
+    var pages: Int = 1
     
     var dataController: DataController! {
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -52,13 +55,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     
     //Function to fetch photos from DataCore, if it does not contain photos, download from flickr
     func fetchPhotos(){
+        print("fetching images")
         let fetchRequest: NSFetchRequest<Photos> = Photos.fetchRequest()
-        fetchRequest.predicate = NSPredicate(format: "pin = %@", pin)
-        if let results = try? dataController.viewContext.fetch(fetchRequest) {
+        fetchRequest.predicate = NSPredicate(format: "location = %@", pin)
+        if let results = try? dataController.viewContext.fetch(fetchRequest), results.count != 0 {
             //Set photos from data core
+            print("fetching from core data")
             photoAlbum = results
         } else {
             //Download photos from flickr
+            print("fetching from flickr")
             downloadImages()
         }
     }
@@ -67,12 +73,10 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     func downloadImages(){
         guard let coordinate = coordinate else {return}
         photoAlbum.removeAll()
-        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, 1) { (response, error) in
+        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, pages) { (response, error) in
             if let response = response {
-                print("saving response")
-                print(response)
-                self.photoAlbum = response
-                self.photoAlbumCollectionView.reloadData()
+                self.pages = response.photos.pages
+                self.downloadPhotos(response)
             } else {
                 print(error?.localizedDescription ?? "error")
             }
@@ -89,41 +93,44 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
 
     //Fill cells with photos from album
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        var cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoAlbumCell", for: indexPath) as! PhotoAlbumCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoAlbumCell", for: indexPath) as! PhotoAlbumCollectionViewCell
         
         let photoCell = photoAlbum[indexPath.row]
-        
-        if photoCell.photoData != nil {
-            cell.photo.image = UIImage(data: photoCell.photoData!)
-        } else {
-            downloadPhotoData(photoCell.photoURL!)
-        }
-        
-        
+        cell.photo.image = UIImage(data: photoCell.photoData!)
         
         return cell
     }
     
-    func downloadPhotoData (_ photoURL: URL) -> Data{
-        var photo: Data?
-        ImageRetrieval.flickrGetPhoto(photoURL: photoURL) { (photoData, error) in
-            if let photoData = photoData{
-                self.storePhoto(photoData, photoURL)
-                photo = photoData
-            } else {
-                print(error?.localizedDescription ?? "error")
+    func downloadPhotos(_ response : FlickrResponse){
+        print("\n Getting data array")
+        let imageArray = response.photos.photo
+        print(imageArray)
+        for image in imageArray {
+            
+            let imageURL = URL(string: image.urlM)
+            
+            let imageView = UIImageView()
+            imageView.kf.setImage(with: imageURL) { (result, error, cache, url) in
+                if error == nil {
+                    let imageData = result!.pngData()!
+                    self.storePhoto(imageData, url!)
+                } else {
+                    print(error)
+                }
             }
         }
-        return photo!
     }
     
     //Function to Stroe images as binary data in Photo entity
     func storePhoto(_ photo: Data,_ url: URL){
+        print("Setting image")
         let photoContext = Photos(context: dataController.viewContext)
         photoContext.photoData = photo
         photoContext.photoURL = url
         photoContext.location = self.pin
         try? dataController.viewContext.save()
+        photoAlbum.append(photoContext)
+        photoAlbumCollectionView.reloadData()
     }
     
     //TODO: tapped images are removed from collection view, photo album, and core data
