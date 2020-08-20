@@ -77,47 +77,6 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    //MARK: MapView Delegate functions
-    
-    //Creat pin to add on the map
-    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        var mapPin = mapScene.dequeueReusableAnnotationView(withIdentifier: "pin")
-        
-        if mapPin == nil {
-            mapPin = MKPinAnnotationView(annotation: annotation, reuseIdentifier: "pin")
-            mapPin?.canShowCallout = true
-            mapPin?.rightCalloutAccessoryView = UIButton(type: .infoDark)
-        }
-        
-        return mapPin
-    }
-    
-    //Function for tapped pin, transitions to photo album interface (with, tapped location)
-    func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
-        if let coordinate = view.annotation?.coordinate {
-            let photoAlbumVC = storyboard?.instantiateViewController(identifier: "PhotoAlbumViewController") as! PhotoAlbumViewController
-            
-            let lat = Double(coordinate.latitude)
-            let lon = Double(coordinate.longitude)
-            for pin in pins {
-                if pin.latitude == lat && pin.longitude == lon {
-                    photoAlbumVC.pin = pin
-                }
-            }
-            photoAlbumVC.coordinate = coordinate
-            self.present(photoAlbumVC, animated: true, completion: nil)
-        }
-    }
-    
-    //Function to save last set location and zoom level
-    func mapViewDidChangeVisibleRegion(_ mapView: MKMapView) {
-        mapLocation["regionLat"] = Double(mapView.region.span.latitudeDelta)
-        mapLocation["regionLon"] = Double(mapView.region.span.longitudeDelta)
-        mapLocation["centerLat"] = Double(mapView.region.center.latitude)
-        mapLocation["centerLon"] = Double(mapView.region.center.longitude)
-        UserDefaults.standard.set(mapLocation, forKey: "mapLocation")
-    }
-    
     //MARK: Load Pins On Map
     
     func LoadPinsOnMap(pins: [Pin]){

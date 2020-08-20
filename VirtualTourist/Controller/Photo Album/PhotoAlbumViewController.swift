@@ -26,7 +26,7 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     //Data related properties
     var photoAlbum: [Photos] = []
     var photoResponse: FlickrResponse!
-    var pages: Int = 1
+    var pages: Int = 10
     
     //Data Controller property
     var dataController: DataController! {
@@ -88,9 +88,6 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         let totalPages = pages
         ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, totalPages) { (response, error) in
             if let response = response {
-                print(response.photos.page)
-                //Set total number of pages from response
-                self.pages = response.photos.pages
                 //Sen response to start downloading photos
                 self.downloadPhotos(response)
             } else {
@@ -139,41 +136,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         progressIndicator.stopAnimating()
     }
     
-    //MARK: Collection View Data Source
-
-    //get number of photos to set number of items
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return photoAlbum.count
-    }
+    //MARK: Action
     
-    
-
-    //Fill cells with photos from album
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "photoAlbumCell", for: indexPath) as! PhotoAlbumCollectionViewCell
-        
-        let photoCell = photoAlbum[indexPath.row]
-        //Set photo recieved
-        cell.photo.kf.setImage(with: photoCell.photoURL)
-        
-        return cell
-    }
-    
-    //TODO: tapped images are removed from collection view, photo album, and core data
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        //Get context of photo to be deleted
-        let photoToDelete = photoAlbum[indexPath.row]
-        //delete photo from core data
-        dataController.viewContext.delete(photoToDelete)
-        try? dataController.viewContext.save()
-        //delete photo from array
-        photoAlbum.remove(at: indexPath.row)
-        //delete photo from collection view
-        collectionView.deleteItems(at: [indexPath])
-    }
-    
-    //TODO: "New Collection" button redownloads new images from other pages (use random value for "page" parameter)
+    //"New Collection" button redownloads new images from other pages (use random value for "page" parameter)
     @IBAction func reloadPhotos(_ sender: Any) {
         //Fetch photos to be deleted where location is the current pin location
         let photosToDelete: NSFetchRequest<Photos> = Photos.fetchRequest()
@@ -196,5 +161,15 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         
     }
     
-
+    func openInMap(){
+        let coordinate = CLLocationCoordinate2DMake(pin.latitude,pin.longitude)
+        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate, addressDictionary:nil))
+        mapItem.name = "Target location"
+        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey : MKLaunchOptionsDirectionsModeDriving])
+    }
+    
+    @IBAction func filterPhotosTapped(_ sender: Any) {
+        self.performSegue(withIdentifier: "filterPopover", sender: nil)
+    }
+    
 }
