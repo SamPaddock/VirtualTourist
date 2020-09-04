@@ -13,8 +13,7 @@
 		FC10B82324E4607300BCE107 /* photosResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC10B82224E4607300BCE107 /* photosResponse.swift */; };
 		FC10B82924EEB4A400BCE107 /* PhotoAlbumViewController+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC10B82824EEB4A400BCE107 /* PhotoAlbumViewController+extension.swift */; };
 		FC10B82B24EEB5BE00BCE107 /* TravelLocationMapViewController+extention.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC10B82A24EEB5BE00BCE107 /* TravelLocationMapViewController+extention.swift */; };
-		FC10B82E24EF265F00BCE107 /* FilterSettingsTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC10B82D24EF265F00BCE107 /* FilterSettingsTableViewController.swift */; };
-		FC10B83024EF33D800BCE107 /* FilterSettingsTableViewController+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC10B82F24EF33D800BCE107 /* FilterSettingsTableViewController+extension.swift */; };
+		FC10B83624FB9F8A00BCE107 /* AlertMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC10B83524FB9F8A00BCE107 /* AlertMessage.swift */; };
 		FC9EAECD24C97E0300F18464 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9EAECC24C97E0300F18464 /* AppDelegate.swift */; };
 		FC9EAECF24C97E0300F18464 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9EAECE24C97E0300F18464 /* SceneDelegate.swift */; };
 		FC9EAED124C97E0300F18464 /* TravelLocationMapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC9EAED024C97E0300F18464 /* TravelLocationMapViewController.swift */; };
@@ -36,8 +35,7 @@
 		FC10B82224E4607300BCE107 /* photosResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = photosResponse.swift; sourceTree = "<group>"; };
 		FC10B82824EEB4A400BCE107 /* PhotoAlbumViewController+extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PhotoAlbumViewController+extension.swift"; sourceTree = "<group>"; };
 		FC10B82A24EEB5BE00BCE107 /* TravelLocationMapViewController+extention.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TravelLocationMapViewController+extention.swift"; sourceTree = "<group>"; };
-		FC10B82D24EF265F00BCE107 /* FilterSettingsTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterSettingsTableViewController.swift; sourceTree = "<group>"; };
-		FC10B82F24EF33D800BCE107 /* FilterSettingsTableViewController+extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FilterSettingsTableViewController+extension.swift"; sourceTree = "<group>"; };
+		FC10B83524FB9F8A00BCE107 /* AlertMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertMessage.swift; sourceTree = "<group>"; };
 		FC9EAEC924C97E0300F18464 /* VirtualTourist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VirtualTourist.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC9EAECC24C97E0300F18464 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		FC9EAECE24C97E0300F18464 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -105,6 +103,7 @@
 				FC9EAEED24C9B8F400F18464 /* ImageRetrieval.swift */,
 				FC10B82024E455BE00BCE107 /* apiConstants.swift */,
 				FC10B82224E4607300BCE107 /* photosResponse.swift */,
+				FC10B83524FB9F8A00BCE107 /* AlertMessage.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -127,13 +126,11 @@
 			path = "Photo Album";
 			sourceTree = "<group>";
 		};
-		FC10B82C24EF262200BCE107 /* Filter Settings */ = {
+		FC10B837250262AC00BCE107 /* Screenshots */ = {
 			isa = PBXGroup;
 			children = (
-				FC10B82D24EF265F00BCE107 /* FilterSettingsTableViewController.swift */,
-				FC10B82F24EF33D800BCE107 /* FilterSettingsTableViewController+extension.swift */,
 			);
-			path = "Filter Settings";
+			path = Screenshots;
 			sourceTree = "<group>";
 		};
 		FC9EAEC024C97E0300F18464 = {
@@ -173,7 +170,6 @@
 				FC9EAECE24C97E0300F18464 /* SceneDelegate.swift */,
 				FC10B82624EEB45400BCE107 /* Travel Location Map */,
 				FC10B82724EEB47400BCE107 /* Photo Album */,
-				FC10B82C24EF262200BCE107 /* Filter Settings */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -184,6 +180,7 @@
 				FC9EAED224C97E0300F18464 /* Main.storyboard */,
 				FC9EAED824C97E0400F18464 /* Assets.xcassets */,
 				FC9EAEDA24C97E0400F18464 /* LaunchScreen.storyboard */,
+				FC10B837250262AC00BCE107 /* Screenshots */,
 			);
 			path = Assests;
 			sourceTree = "<group>";
@@ -313,12 +310,11 @@
 			files = (
 				FC9EAED724C97E0300F18464 /* VirtualTourist.xcdatamodeld in Sources */,
 				FC9EAED124C97E0300F18464 /* TravelLocationMapViewController.swift in Sources */,
-				FC10B83024EF33D800BCE107 /* FilterSettingsTableViewController+extension.swift in Sources */,
-				FC10B82E24EF265F00BCE107 /* FilterSettingsTableViewController.swift in Sources */,
 				FC10B82124E455BE00BCE107 /* apiConstants.swift in Sources */,
 				FC9EAEEE24C9B8F400F18464 /* ImageRetrieval.swift in Sources */,
 				FC10B82924EEB4A400BCE107 /* PhotoAlbumViewController+extension.swift in Sources */,
 				FC9EAECD24C97E0300F18464 /* AppDelegate.swift in Sources */,
+				FC10B83624FB9F8A00BCE107 /* AlertMessage.swift in Sources */,
 				FC9EAEE824C97FB800F18464 /* PhotoAlbumViewController.swift in Sources */,
 				FC10B81F24E2DFC000BCE107 /* DataController.swift in Sources */,
 				FC9EAECF24C97E0300F18464 /* SceneDelegate.swift in Sources */,

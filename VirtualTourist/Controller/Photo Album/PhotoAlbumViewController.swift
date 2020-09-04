@@ -11,13 +11,15 @@ import MapKit
 import CoreData
 import Kingfisher
 
-class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource{
+class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectionViewDelegate, UICollectionViewDataSource, UIPickerViewDataSource, UIPickerViewDelegate{
 
     //MARK: properties
     //Outlet properties
     @IBOutlet weak var mapScene: MKMapView!
     @IBOutlet weak var photoAlbumCollectionView: UICollectionView!
     @IBOutlet weak var progressIndicator: UIActivityIndicatorView!
+    @IBOutlet weak var newCollectionBtn: UIBarButtonItem!
+    @IBOutlet weak var filterOptionBtn: UIBarButtonItem!
     
     //Location properties
     var coordinate: CLLocationCoordinate2D? = nil
@@ -27,6 +29,9 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
     var photoAlbum: [Photos] = []
     var photoResponse: FlickrResponse!
     var pages: Int = 10
+    var dataPickerSource: [String] = []
+    var accuracy: String = "11"
+    var tag: String = ""
     
     //Data Controller property
     var dataController: DataController! {
@@ -41,10 +46,14 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         mapScene.delegate = self
         photoAlbumCollectionView.delegate = self
         photoAlbumCollectionView.dataSource = self
+        //set UI Component enableility
+        setUIComponents(fiter: true, newCollection: true)
         //Show location of photos
         placePinLocation()
         //Check if there are saved photos of that location
         fetchPhotos()
+        //Populate pickerView
+        SetPickerViewData()
     }
     
     //MARK: Setting UI
@@ -60,6 +69,18 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         //center map view on selected location
         let region = MKCoordinateRegion(center: sentCoordinates, span: MKCoordinateSpan(latitudeDelta: 3, longitudeDelta: 3))
         mapScene.setRegion(region, animated: true)
+    }
+    
+    //Function with array of tags for pickerView data source
+    func SetPickerViewData(){
+        //Some tag values
+        dataPickerSource = ["", "night", "ouside", "sea", "nature", "blue", "pet", "photography"]
+    }
+    
+    //Function to change UI Component
+    func setUIComponents(fiter isFilterEnabled: Bool, newCollection isNewCollectionEnabled: Bool){
+        filterOptionBtn.isEnabled = isFilterEnabled
+        newCollectionBtn.isEnabled = isNewCollectionEnabled
     }
     
     //MARK: Setting Data
@@ -86,18 +107,27 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
         guard let coordinate = coordinate else {return}
         //Set total number of pages, default is 1 page
         let totalPages = pages
-        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, totalPages) { (response, error) in
+        ImageRetrieval.flickerAPI(coordinate.latitude, coordinate.longitude, totalPages, tag, accuracy) { (response, error, errorCode) in
             if let response = response {
                 //Sen response to start downloading photos
                 self.downloadPhotos(response)
             } else {
                 print(error?.localizedDescription ?? "error")
+                let alert = AlertMessage.errorAlert(Code: errorCode)
+                self.present(alert, animated: true, completion: nil)
             }
         }
     }
     
     //Function to download photos from flickr using kingfisher
     func downloadPhotos(_ response : FlickrResponse){
+        guard response.photos.photo.count > 0 else {
+            setUIComponents(fiter: false, newCollection: false)
+            progressIndicator.stopAnimating()
+            let alert = AlertMessage.errorAlert(Code: 204)
+            self.present(alert, animated: true, completion: nil)
+            return
+        }
         //Set photo array from reponse
         let imageArray = response.photos.photo
         //Loop over each photo to download
@@ -111,35 +141,16 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
                     let imageData = result!.pngData()!
                     self.storePhoto(imageData, url!)
                 } else {
-                    print(error)
+                    let alert = AlertMessage.errorAlert(Code: 418)
+                    self.present(alert, animated: true, completion: nil)
                 }
             }
         }
     }
     
-    //MARK: Store Data
-    
-    //Function to Stroe images as binary data in Photo entity
-    func storePhoto(_ photo: Data,_ url: URL){
-        //Create photo context for core data Photo entity
-        let photoContext = Photos(context: dataController.viewContext)
-        photoContext.photoData = photo
-        photoContext.photoURL = url
-        photoContext.location = self.pin
-        //Save photo context in core data
-        try? dataController.viewContext.save()
-        //Add element in array
-        photoAlbum.append(photoContext)
-        //Reload collection view to display new photo
-        photoAlbumCollectionView.reloadData()
-        //Stop progress animation
-        progressIndicator.stopAnimating()
-    }
-    
-    //MARK: Action
-    
-    //"New Collection" button redownloads new images from other pages (use random value for "page" parameter)
-    @IBAction func reloadPhotos(_ sender: Any) {
+    //Function to delete all photos and reload new photo collection
+    func deleteAllandReload() {
+        
         //Fetch photos to be deleted where location is the current pin location
         let photosToDelete: NSFetchRequest<Photos> = Photos.fetchRequest()
         photosToDelete.predicate = NSPredicate(format: "location = %@", pin)
@@ -158,18 +169,108 @@ class PhotoAlbumViewController: UIViewController, MKMapViewDelegate, UICollectio
             print("Error: no photos deleted")
         }
         try? dataController.viewContext.save()
-        
     }
     
-    func openInMap(){
-        let coordinate = CLLocationCoordinate2DMake(pin.latitude,pin.longitude)
-        let mapItem = MKMapItem(placemark: MKPlacemark(coordinate: coordinate, addressDictionary:nil))
-        mapItem.name = "Target location"
-        mapItem.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey : MKLaunchOptionsDirectionsModeDriving])
+    //MARK: Store Data
+    
+    //Function to Stroe images as binary data in Photo entity
+    func storePhoto(_ photo: Data,_ url: URL){
+        //Create photo context for core data Photo entity
+        let photoContext = Photos(context: dataController.viewContext)
+        photoContext.photoData = photo
+        photoContext.photoURL = url
+        photoContext.location = self.pin
+        //Save photo context in core data
+        try? dataController.viewContext.save()
+        //Add element in array
+        photoAlbum.append(photoContext)
+        //Reload collection view to display new photo
+        photoAlbumCollectionView.reloadData()
+        //refreshed the collection view layout when reloading data
+        photoAlbumCollectionView.collectionViewLayout.invalidateLayout()
+        //Stop progress animation
+        progressIndicator.stopAnimating()
     }
     
+    //MARK: Action: Toolbar Functions
+    
+    //"New Collection" button redownloads new images from other pages (use random value for "page" parameter)
+    @IBAction func newCollectionReload(_ sender: Any) {
+        deleteAllandReload()
+    }
+    
+    //"Filter" button to filter through photos of the selected location by accuracy range or tag value
     @IBAction func filterPhotosTapped(_ sender: Any) {
-        self.performSegue(withIdentifier: "filterPopover", sender: nil)
+        let filterSelection = UIAlertController(title: "Filter Options", message: nil, preferredStyle: .actionSheet)
+        
+        let accuracyOption = UIAlertAction.init(title: "Covergae Range", style: .default) { (alert) in
+            self.accuracySelectionAlertAction()
+        }
+        filterSelection.addAction(accuracyOption)
+        
+        let tagOption = UIAlertAction.init(title: "Tags", style: .default) { (alert) in
+            self.tagSelectionAlertAction()
+        }
+        filterSelection.addAction(tagOption)
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        filterSelection.addAction(cancelAction)
+        
+        self.present(filterSelection, animated: true, completion: nil)
+    }
+    
+    //MARK: ActionSheet: Filtering Photos
+    
+    //Function to present ction sheet with multipule range option for accuracy range
+    func accuracySelectionAlertAction(){
+        let accuracySelection = UIAlertController(title: "Covergae Range", message: "Retrieves photos from the selected coverage range", preferredStyle: .actionSheet)
+        
+        accuracySelection.addAction(alertActionSelection(title: "City"))
+        accuracySelection.addAction(alertActionSelection(title: "Region"))
+        accuracySelection.addAction(alertActionSelection(title: "Country"))
+        
+        let okAction = UIAlertAction(title: "Okay", style: .cancel, handler: nil)
+        accuracySelection.addAction(okAction)
+        
+        self.present(accuracySelection, animated: true, completion: nil)
+    }
+    
+    //Create alert action to return and be added to the alert
+    func alertActionSelection(title range: String) -> UIAlertAction{
+        return UIAlertAction(title: range, style: .default, handler: accuracySelectionHandler(_:))
+    }
+    
+    //Function to present ction sheet with picker view of tag values
+    func tagSelectionAlertAction(){
+        let tagSelection = UIAlertController(title: "Tags", message: "Retrieves photos from the selected coverage range", preferredStyle: .actionSheet)
+        
+        let height:NSLayoutConstraint = NSLayoutConstraint(item: tagSelection.view!, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: 250)
+        tagSelection.view.addConstraint(height)
+        
+        let width = Int(tagSelection.view.bounds.width - 15)
+        let pickerFrame = UIPickerView(frame: CGRect(x: 0, y: 50, width: width, height: 140))
+        
+        pickerFrame.dataSource = self
+        pickerFrame.delegate = self
+        tagSelection.view.addSubview(pickerFrame)
+        
+        let okAction = UIAlertAction(title: "Okay", style: .default, handler: nil)
+        tagSelection.addAction(okAction)
+        
+        self.present(tagSelection, animated: true, completion: nil)
+    }
+    
+    //MARK: Handler Functions
+    
+    //Function to handlw accuracy range selected
+    func accuracySelectionHandler(_ alert: UIAlertAction){
+        switch alert.title {
+        case "City": accuracy = "11"
+        case "Region": accuracy = "6"
+        case "Country": accuracy = "3"
+        default: accuracy = "11"
+        }
+        deleteAllandReload()
     }
     
 }

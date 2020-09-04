@@ -122,6 +122,9 @@ class TravelLocationMapViewController: UIViewController, MKMapViewDelegate {
         if let results = try? dataController.viewContext.fetch(fetchRequest) {
             pins = results
             LoadPinsOnMap(pins: results)
+        } else {
+            let alert = AlertMessage.errorAlert(Code: 415)
+            present(alert, animated: true, completion: nil)
         }
     }
 }

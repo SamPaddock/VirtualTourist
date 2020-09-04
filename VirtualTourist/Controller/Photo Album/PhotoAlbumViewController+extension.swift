@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-//MARK: - Collection View Data Source
+//MARK: - Collection View Data Source/Delegate
 
 extension PhotoAlbumViewController {
     //get number of photos to set number of items
@@ -39,3 +39,35 @@ extension PhotoAlbumViewController {
         collectionView.deleteItems(at: [indexPath])
     }
 }
+
+//MARK: - Picker View Data Source/Delegate
+
+extension PhotoAlbumViewController {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return dataPickerSource.count
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return dataPickerSource[row] as String
+    }
+    
+    func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        let selectedTag = dataPickerSource[row] as String
+        tag = selectedTag
+        //if no filter options is selected, then set total pages to 10. else if a filter is selected then set number of pages to one and disable the feature to reload a new collection
+        if tag == "" {
+            pages = 10
+            setUIComponents(fiter: true, newCollection: true)
+        } else {
+            pages = 1
+            setUIComponents(fiter: true, newCollection: false)
+        }
+        deleteAllandReload()
+    }
+}
+
+

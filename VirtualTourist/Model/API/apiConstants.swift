@@ -26,7 +26,7 @@ struct FlickrKeys {
     static let apiKey = "api_key"
     static let method = "method"
     static let accuracy = "accuracy"
-    static let tag = "tag"
+    static let tag = "tags"
     static let latitude = "lat"
     static let longitude = "lon"
     static let perPage = "per_page"
@@ -42,5 +42,15 @@ struct FlickrValues {
     static let jsonFormat = "json"
     static let nojsoncallback = "1"
     static let extraURL = "url_m"
+}
+
+//MARK: Error Code
+struct ErrorCode {
+    static let success = 200
+    static let networkFailure = 500
+    static let loadingFailure = 415
+    static let loadingPhoto = 418
+    static let emptyContent = 204
+    static let decodeFailure = 600
 }
 
