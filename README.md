@@ -3,7 +3,7 @@ Users can selected a location on the map and some images for the locations are s
 
 ## Introduction
 
-The application is developed to meet the requirments for the fifth project in the udacity connect - iOS development course.
+The application is developed to meet the requirments for the fifth and sixth project in the udacity connect - iOS development course.
 * Implmenting URLSession
 * Saving and loading data from CoreData
 * Using MapKit library to show location on the map
@@ -17,6 +17,23 @@ Open terminal app and navigate to project folders
 
 Clone project repository
 `$ git clone https://github.com/SamPaddock/VirtualTourist.git`
+
+## Flowchart
+The following section covers the flow of the application
+
+### On the map
+A user can add a pin on the map that is then saved in-app. If the user closes the app and reopens it, the same pins that were added, will be displayed again. 
+Pins can be added by a long press gesture and a single tap with display the photo album interface, which displays the photos of that tapped location.
+
+
+### Photo Album
+The photo album displays 21 photos of the selected location. The user can tap new collection to reload the photos and present a new collection of photos.
+A new feature is added to filter through the photos of the selected location (section: Filter Options)
+
+
+### Fliter Options
+There are two filter option: Tags and Range. Tags are the hashtags added to photos by users when uploaded to the flickr server. Currently, only a single tag value can be selected. While the range filter can change the range of photos the present. the deault is city range, where all photos with the city selected is displayed. the user can change that to the region or the country of the tapped location.
+
 
 ## Technology
 CoreData: Allow data to be saved in-app to avoid data lose and provide persistance in the application
